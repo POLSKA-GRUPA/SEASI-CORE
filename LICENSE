@@ -1,0 +1,28 @@
+SEASI-CORE — Source Available License
+Copyright (c) 2026 Kenyi Martín Alcántara. All rights reserved.
+
+1. Grant. The source code in this repository is made publicly available
+   ("source available") for review, evaluation, educational inspection and
+   continuous-integration transparency only.
+
+2. Restrictions. Without a separate written license signed by the copyright
+   holder, you may NOT:
+   - use this software or any part of it for commercial purposes;
+   - redistribute it, in source or binary form, verbatim or modified;
+   - remove or alter this notice or the copyright statement.
+
+3. Forking on the hosting platform is permitted solely to propose changes
+   back to this repository, and does not grant any right to reuse the code
+   elsewhere.
+
+4. Third-party dependencies keep their own licenses; nothing in this file
+   overrides them.
+
+5. NO WARRANTY. The software is provided "as is", without warranty of any
+   kind, express or implied.
+
+6. Licensing inquiries: contact the copyright holder.
+
+This notice is a summary, not a substitute for a definitive licensing
+agreement. A future release may adopt a standard source-available license
+(e.g. BUSL-1.1) at the copyright holder's discretion.

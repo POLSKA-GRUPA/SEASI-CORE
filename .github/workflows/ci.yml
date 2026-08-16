@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv python install 3.12
+      - run: uv sync --all-groups
+      - run: uv run ruff format --check .
+      - run: uv run ruff check .
+      - run: uv run mypy src
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv python install ${{ matrix.python-version }}
+      - run: uv sync --all-groups --python ${{ matrix.python-version }}
+      - run: uv run --python ${{ matrix.python-version }} pytest -q
+
+  hygiene:
+    runs-on: ubuntu-latest
+    name: No legacy literals
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail if any legacy brand literal appears
+        run: |
+          if grep -rniE 'pgk|polska|hiszpania' --exclude-dir=.git . ; then
+            echo "::error::Legacy literal found in repository content"
+            exit 1
+          fi
