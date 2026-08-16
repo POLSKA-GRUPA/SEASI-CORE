@@ -23,6 +23,7 @@ from seasi_core.kernel.registry import (
     RegistrationError,
     Registry,
     UnknownKeyError,
+    WorkflowRegistry,
 )
 
 __all__ = [
@@ -37,6 +38,7 @@ __all__ = [
     "Registry",
     "TenantContextError",
     "UnknownKeyError",
+    "WorkflowRegistry",
     "bind_intent",
     "canonical_json",
     "current_tenant",

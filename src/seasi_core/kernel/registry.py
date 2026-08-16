@@ -7,6 +7,7 @@ from types import MappingProxyType
 from typing import Generic, TypeVar
 
 from seasi_core.contracts.capabilities import CapabilitySpec
+from seasi_core.contracts.workflows import WorkflowDefinition
 
 T = TypeVar("T")
 
@@ -82,3 +83,10 @@ class Registry(Generic[T]):
 
 class ActionRegistry(Registry[CapabilitySpec]):
     """Registry of ``CapabilitySpec`` objects; the governed action catalog."""
+
+
+class WorkflowRegistry(Registry[WorkflowDefinition]):
+    """Registry of ``WorkflowDefinition`` objects with checksum access."""
+
+    def checksum(self, workflow_id: str) -> str:
+        return self.get(workflow_id).checksum()

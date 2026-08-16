@@ -14,7 +14,7 @@
 - Aislamiento probado entre tenants (tests de isolation).
 - CI: lint + format + mypy + pytest (3.11/3.12/3.13) + higiene anti-literales.
 
-## v0.2 — Module SDK + GESTIÓN AUTÓNOMA (repo privado)
+## v0.2 — Module SDK + GESTIÓN AUTÓNOMA (repo privado) — SDK ✅
 
 - SDK de módulo: `ModuleManifest`, loader, validación de handshake contra
   registries del kernel, plantilla de repo de módulo con CI propia.

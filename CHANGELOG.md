@@ -3,6 +3,17 @@
 Todos los cambios notables del kernel se documentan aquí.
 Formato basado en Keep a Changelog; versionado SemVer.
 
+## [0.2.0] — 2026-08-16
+
+### Added
+- **Module SDK** (`seasi_core.sdk`): `ModuleBuilder`, `LoadedModule`,
+  `install_module` — handshake fail-closed entre módulos de producto y el
+  kernel: duplicados rechazados, workflows solo pueden usar capabilities
+  propias del módulo (composición cruzada explícita, nunca implícita),
+  manifest coherente con lo entregado.
+- `WorkflowRegistry` con acceso a checksums de definiciones instaladas.
+- Tests SDK (builder, handshake, end-to-end con gate HITL desde un módulo).
+
 ## [0.1.0] — 2026-08-16
 
 ### Added
