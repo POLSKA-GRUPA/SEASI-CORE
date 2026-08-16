@@ -14,7 +14,11 @@
 - Aislamiento probado entre tenants (tests de isolation).
 - CI: lint + format + mypy + pytest (3.11/3.12/3.13) + higiene anti-literales.
 
-## v0.2 — Module SDK + GESTIÓN AUTÓNOMA (repo privado) — SDK ✅
+## v0.2 — Module SDK + GESTIÓN AUTÓNOMA ✅ (2026-08-16)
+
+- **SDK del kernel** (`seasi_core.sdk`): ModuleBuilder/LoadedModule/install_module.
+- **Módulo GESTIÓN AUTÓNOMA** publicado (repo privado): census onboarding 036
+  con HITL, obligations tracking, `gestion.filing.submit` gated.
 
 - SDK de módulo: `ModuleManifest`, loader, validación de handshake contra
   registries del kernel, plantilla de repo de módulo con CI propia.
@@ -23,7 +27,10 @@
 - Capability catalog inicial: `census.read`, `filing.draft`,
   `filing.submit` (external_mutation, gated).
 
-## v0.3 — CONTA-LABORAL (repo privado)
+## v0.3 — CONTA-LABORAL ✅ (2026-08-16)
+
+- Módulo publicado (repo privado): invoice intake con validación aritmética
+  exacta en céntimos, `conta.ledger.post` y `laboral.payroll.submit` gated.
 
 - **CONTA-LABORAL**: ingesta documental con extracción asistida, libro de
   facturas propuesto, nóminas, modelos tributarios.
@@ -31,7 +38,10 @@
   el sistema externo es el system-of-record contable.
 - Contratos documentales v2 (partidas, rectificativas, retenciones).
 
-## v0.4 — MARKETING (repo privado)
+## v0.4 — MARKETING ✅ (2026-08-16)
+
+- Módulo publicado (repo privado): publish flow con `marketing.social.publish`
+  gated; nada se publica sin ApprovalIntent verificada.
 
 - **MARKETING**: campañas, contenido, programación social con cadence y
   aprobaciones de un solo uso.
