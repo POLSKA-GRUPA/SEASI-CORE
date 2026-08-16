@@ -22,7 +22,8 @@ SEASI se comercializa como plataforma para gestorías. Se requiere:
    CONTA-LABORAL, MARKETING. Ningún código comercial vive aquí.
 3. **Este repositorio no contiene datos de clientes, credenciales, prompts
    propietarios ni literales de marca heredada** — enforced por el job de
-   higiene de CI (`pgk|polska|hiszpania` → fallo).
+   higiene de CI (la mera aparición de un literal de marca heredada hace
+   fallar la pipeline).
 4. El historial arrancó de cero (huérfano) el 2026-08-16 para garantizar
    cero rastros; el historial del precursor se conserva como bundle firmado
    (SHA-256) fuera del repositorio.

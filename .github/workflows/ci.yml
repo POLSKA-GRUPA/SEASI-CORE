@@ -37,7 +37,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Fail if any legacy brand literal appears
         run: |
-          if grep -rniE 'pgk|polska|hiszpania' --exclude-dir=.git . ; then
+          # pattern assembled by concatenation so this file itself stays clean
+          PAT="pg""k|pol""ska|hisz""pania"
+          if grep -rniE "$PAT" --exclude-dir=.git . ; then
             echo "::error::Legacy literal found in repository content"
             exit 1
           fi
