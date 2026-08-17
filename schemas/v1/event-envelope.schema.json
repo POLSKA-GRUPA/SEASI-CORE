@@ -5,22 +5,47 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "event_id",
-    "schema_version",
     "event_type",
-    "tenant",
-    "occurred_at",
-    "payload"
+    "tenant"
   ],
   "properties": {
-    "event_id": { "type": "string", "format": "uuid" },
-    "schema_version": { "const": "seasi.event/v1" },
-    "event_type": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9_-]+)+$" },
-    "tenant": { "$ref": "seasi/tenant-scope/v1" },
-    "occurred_at": { "type": "string", "format": "date-time" },
-    "correlation_id": { "type": "string", "minLength": 1, "maxLength": 128 },
-    "causation_id": { "type": "string", "minLength": 1, "maxLength": 128 },
-    "payload": { "type": "object" },
-    "payload_digest": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" }
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "schema_version": {
+      "const": "seasi.event/v1"
+    },
+    "event_type": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(\\.[a-z0-9_-]+)+$"
+    },
+    "tenant": {
+      "$ref": "seasi/tenant-scope/v1"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "causation_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "payload": {
+      "type": "object"
+    },
+    "payload_digest": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    }
   }
 }

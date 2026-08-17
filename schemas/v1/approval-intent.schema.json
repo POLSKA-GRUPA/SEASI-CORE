@@ -5,7 +5,6 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "intent_id",
     "tenant",
     "actor",
     "capability_id",
@@ -15,13 +14,39 @@
     "nonce"
   ],
   "properties": {
-    "intent_id": { "type": "string", "format": "uuid" },
-    "tenant": { "$ref": "seasi/tenant-scope/v1" },
-    "actor": { "type": "string", "minLength": 1, "maxLength": 128 },
-    "capability_id": { "type": "string", "minLength": 1, "maxLength": 128 },
-    "payload_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-    "created_at": { "type": "string", "format": "date-time" },
-    "expires_at": { "type": "string", "format": "date-time" },
-    "nonce": { "type": "string", "minLength": 8, "maxLength": 64 }
+    "intent_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "tenant": {
+      "$ref": "seasi/tenant-scope/v1"
+    },
+    "actor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "capability_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "payload_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 64
+    }
   }
 }

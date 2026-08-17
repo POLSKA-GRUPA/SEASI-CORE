@@ -4,7 +4,9 @@
   "title": "TenantScope",
   "type": "object",
   "additionalProperties": false,
-  "required": ["tenant_id"],
+  "required": [
+    "tenant_id"
+  ],
   "properties": {
     "tenant_id": {
       "type": "string",
@@ -12,7 +14,21 @@
       "minLength": 1,
       "maxLength": 64
     },
-    "case_ref": { "type": "string", "minLength": 1, "maxLength": 128 },
-    "project_ref": { "type": "string", "minLength": 1, "maxLength": 128 }
+    "case_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "project_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 128
+    }
   }
 }

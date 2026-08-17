@@ -89,12 +89,13 @@ from seasi_core.orchestration.runner import NeutralRunner
 
 actions = ActionRegistry()
 actions.register(
+    "ledger.dispatch",
     CapabilitySpec(
         capability_id="ledger.dispatch",
         version="1.0.0",
         effect=EffectClass.EXTERNAL_MUTATION,
         approval=ApprovalPolicy.REQUIRED,
-    )
+    ),
 )
 
 workflow = WorkflowDefinition(
@@ -116,8 +117,20 @@ instance = runner.start(workflow, TenantScope(tenant_id="acme", case_ref="c-1"))
 instance = runner.run(instance)
 assert instance.status.value == "paused_approval"  # waiting for a human
 
-decision = ...  # your reviewer UI produces an ApprovalDecision
-instance = runner.run(instance, approver=lambda i: decision)
+from datetime import datetime, timezone
+from seasi_core.contracts.evidence import ApprovalDecision
+
+
+def approver(intent):  # in production this is your reviewer UI
+    return ApprovalDecision(
+        intent_id=intent.intent_id,
+        approved=True,
+        decided_by="reviewer@acme",
+        decided_at=datetime.now(timezone.utc),
+    )
+
+
+instance = runner.run(instance, approver=approver)
 assert instance.status.value == "completed"
 ```
 
@@ -145,6 +158,7 @@ src/seasi_core/
 ├── contracts/       # tenant, capabilities, events, evidence, workflows
 ├── kernel/          # fail-closed context, registries, effect policy, intent binding
 ├── orchestration/   # neutral runner with HITL approval gates
+├── sdk/             # Module SDK: contract product modules implement
 └── observability/   # structured logging (tenant/workflow/case/state)
 schemas/v1/          # closed JSON Schema twins of the core contracts
 tests/               # unit · contract · isolation · integration
@@ -153,7 +167,10 @@ docs/                # ADRs and architecture decisions
 
 ## Status
 
-`v0.1.0` — kernel contracts + neutral runner + approval authority.
+`v0.2.2` — kernel contracts, neutral runner with HITL approval authority
+(one approval per call, reentrancy guard, explicit intent expiry), and the
+Module SDK (`seasi_core.sdk`) that product modules implement to register
+capabilities and workflows against the kernel.
 See [ROADMAP.md](ROADMAP.md) and [CHANGELOG.md](CHANGELOG.md).
 
 ## License

@@ -122,7 +122,8 @@ class TestShippedSchemas:
             "expires_at",
             "nonce",
         }
-        assert set(schema["required"]) == props
+        # intent_id has a default_factory on the model, so it is not required
+        assert set(schema["required"]) == props - {"intent_id"}
 
     def test_event_envelope_schema(self) -> None:
         schema = self._load("event-envelope.schema.json")

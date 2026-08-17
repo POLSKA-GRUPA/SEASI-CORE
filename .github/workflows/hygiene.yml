@@ -1,0 +1,57 @@
+name: Hygiene
+on: [push, pull_request]
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    name: No personal data or real identifiers
+    steps:
+      - uses: actions/checkout@v4
+
+      # Generic structural checks. This file contains no sensitive literals,
+      # so it scans itself and every other tracked file, including PROVENANCE.
+      - name: Generic checks
+        run: |
+          FAIL=0
+          # Spanish tax IDs (CIF shape) that do not look synthetic.
+          # Synthetic convention: a run of >=6 zeros in the body (B00000091).
+          if grep -rnoE '\b[ABCDEFGHJNPQRSUVW][0-9]{8}\b' \
+              --exclude-dir=.git --exclude-dir=.venv --exclude-dir=node_modules \
+              --exclude-dir=.mypy_cache --exclude-dir=.pytest_cache \
+              --exclude-dir=.ruff_cache --exclude-dir=__pycache__ \
+              --exclude="uv.lock" . \
+            | grep -vE ':[A-Z]0{6}[0-9]{2}$' \
+            | grep -vE '12345678|00000000|11111111' ; then
+            echo "::error::CIF-shaped identifier that does not look synthetic (see lines above)"
+            FAIL=1
+          fi
+          # Absolute user home paths
+          if grep -rnE '/Users/[a-z]+|/home/[a-z]+' \
+              --exclude-dir=.git --exclude-dir=.venv --exclude-dir=node_modules \
+              --exclude-dir=.mypy_cache --exclude-dir=.pytest_cache \
+              --exclude-dir=.ruff_cache --exclude-dir=__pycache__ \
+              --exclude="uv.lock" . ; then
+            echo "::error::Absolute user path found (see lines above)"
+            FAIL=1
+          fi
+          exit $FAIL
+
+      # Denylist of concrete identifiers (real CIFs, domains, personal names).
+      # Stored as an Actions secret so the list itself is never published.
+      - name: Denylist check
+        env:
+          HYGIENE_PATTERNS: ${{ secrets.HYGIENE_PATTERNS }}
+        run: |
+          if [ -z "$HYGIENE_PATTERNS" ]; then
+            echo "::warning::HYGIENE_PATTERNS secret not set - denylist check skipped"
+            exit 0
+          fi
+          if grep -rniE "$HYGIENE_PATTERNS" \
+              --exclude-dir=.git --exclude-dir=.venv --exclude-dir=node_modules \
+              --exclude-dir=.mypy_cache --exclude-dir=.pytest_cache \
+              --exclude-dir=.ruff_cache --exclude-dir=__pycache__ \
+              --exclude="uv.lock" . \
+            | grep -v "github.com/POLSKA-GRUPA" ; then
+            echo "::error::Denylisted identifier found (patterns are confidential)"
+            exit 1
+          fi
