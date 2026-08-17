@@ -141,21 +141,28 @@ class NeutralRunner:
     ) -> WorkflowInstance:
         """Advance until terminal, pause or failure. Idempotent on final states.
 
-        When ``approver`` is provided, approval requests are resolved
-        automatically within the same call (pause → verify → resume) until
-        the workflow reaches a terminal state or an invalid approval keeps
-        it paused.
+        HITL cadence: each call resolves AT MOST ONE pending approval. When
+        ``approver`` is provided, the current pending intent is verified and
+        resolved; execution then continues until the NEXT approval request
+        (or a terminal state) and pauses again. A single call therefore
+        represents exactly one human decision cycle — callers always get
+        the instance back at a reviewable point.
         """
         if instance.status in (WorkflowStatus.COMPLETED, WorkflowStatus.FAILED):
             return instance
 
+        resolved_here = False
         while instance.status not in (WorkflowStatus.COMPLETED, WorkflowStatus.FAILED):
             if instance.status is WorkflowStatus.PAUSED_APPROVAL:
                 if approver is None:
                     return instance
+                if resolved_here:
+                    # one human decision per call: stop at the next gate
+                    return instance
                 resumed = self._resolve_pending(instance, approver)
                 if resumed is not WorkflowStatus.RUNNING:
                     return instance
+                resolved_here = True
                 continue
 
             transitions = instance.definition.transitions_from(instance.state)

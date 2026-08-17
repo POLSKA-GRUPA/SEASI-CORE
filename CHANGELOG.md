@@ -3,6 +3,17 @@
 Todos los cambios notables del kernel se documentan aquí.
 Formato basado en Keep a Changelog; versionado SemVer.
 
+## [0.2.1] — 2026-08-17
+
+### Fixed
+- **Cadencia HITL**: `NeutralRunner.run(approver=...)` resuelve como máximo
+  UNA aprobación por llamada y pausa en la siguiente puerta. Antes encadenaba
+  todas las aprobaciones de golpe en una sola llamada, impidiendo revisar
+  entre puertas. Cada llamada = exactamente un ciclo de decisión humana.
+
+### Added
+- Tests de regresión de cadencia (workflow con dos puertas).
+
 ## [0.2.0] — 2026-08-16
 
 ### Added
