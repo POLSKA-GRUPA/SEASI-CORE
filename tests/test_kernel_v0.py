@@ -24,7 +24,7 @@ from seasi_core.rpc.methods import build_dispatcher
 from seasi_core.rpc.server import serve
 
 
-def _tenant(name: str = "pgk") -> TenantScope:
+def _tenant(name: str = "demo") -> TenantScope:
     return TenantScope(tenant_id=name)
 
 
@@ -32,21 +32,21 @@ def _tenant(name: str = "pgk") -> TenantScope:
 
 
 def test_scope_guard_resolves_inside(tmp_path: Path) -> None:
-    guard = TenantPathGuard(root=tmp_path, tenant_id="pgk")
+    guard = TenantPathGuard(root=tmp_path, tenant_id="demo")
     resolved = guard.resolve("clientes/X/factura.pdf")
-    assert str(resolved).startswith(str(tmp_path / "pgk"))
+    assert str(resolved).startswith(str(tmp_path / "demo"))
 
 
 @pytest.mark.parametrize("bad", ["/etc/passwd", "../other/file", "a/../../b", "~/x"])
 def test_scope_guard_rejects_escapes(tmp_path: Path, bad: str) -> None:
-    guard = TenantPathGuard(root=tmp_path, tenant_id="pgk")
+    guard = TenantPathGuard(root=tmp_path, tenant_id="demo")
     with pytest.raises(ScopeViolation):
         guard.resolve(bad)
 
 
 def test_scope_guard_ensure_absolute(tmp_path: Path) -> None:
-    guard = TenantPathGuard(root=tmp_path, tenant_id="pgk")
-    guard.ensure(tmp_path / "pgk" / "sessions" / "x")
+    guard = TenantPathGuard(root=tmp_path, tenant_id="demo")
+    guard.ensure(tmp_path / "demo" / "sessions" / "x")
     with pytest.raises(ScopeViolation):
         guard.ensure(tmp_path / "other" / "x")
 
@@ -58,8 +58,8 @@ def test_ledger_appends_and_verifies(tmp_path: Path) -> None:
     ledger = EventLedger(tmp_path / "led.db")
     for i in range(3):
         ledger.append(build_event("test.tick", _tenant(), {"i": i}))
-    assert ledger.verify_chain("pgk") is True
-    records = ledger.tail("pgk", limit=10)
+    assert ledger.verify_chain("demo") is True
+    records = ledger.tail("demo", limit=10)
     assert [r.payload["i"] for r in reversed(records)] == [0, 1, 2]
 
 
@@ -70,16 +70,16 @@ def test_ledger_detects_tampering(tmp_path: Path) -> None:
         ledger._conn.execute(
             "UPDATE ledger_events SET payload_json = '{\"i\": 999}' WHERE seq = 1"
         )
-    assert ledger.verify_chain("pgk") is False
+    assert ledger.verify_chain("demo") is False
 
 
 def test_ledger_isolates_tenants(tmp_path: Path) -> None:
     ledger = EventLedger(tmp_path / "led.db")
-    ledger.append(build_event("test.tick", _tenant("pgk"), {"i": 1}))
+    ledger.append(build_event("test.tick", _tenant("demo"), {"i": 1}))
     ledger.append(build_event("test.tick", _tenant("other"), {"i": 2}))
-    assert ledger.verify_chain("pgk") is True
+    assert ledger.verify_chain("demo") is True
     assert ledger.verify_chain("other") is True
-    assert len(ledger.tail("pgk", 10)) == 1
+    assert len(ledger.tail("demo", 10)) == 1
 
 
 # -- hitl store ---------------------------------------------------------------
@@ -111,7 +111,7 @@ def test_hitl_create_decide_and_seal_intent(tmp_path: Path) -> None:
     assert intent.actor == "kenyi"
     assert intent.payload_digest == pause.payload_digest
     assert store.list_pending(_tenant()) == []
-    assert ledger.verify_chain("pgk") is True
+    assert ledger.verify_chain("demo") is True
 
 
 def test_hitl_double_decide_fails_closed(tmp_path: Path) -> None:
@@ -243,8 +243,8 @@ def test_rpc_happy_and_errors(tmp_path: Path) -> None:
         "id": 1,
         "method": "seasi.session.start",
         "params": {
-            "tenant_id": "pgk",
-            "client_ref": "B82211806",
+            "tenant_id": "demo",
+            "client_ref": "B00000091",
             "period_ref": "2026T3",
         },
     }
@@ -257,7 +257,7 @@ def test_rpc_happy_and_errors(tmp_path: Path) -> None:
                     "jsonrpc": "2.0",
                     "id": 3,
                     "method": "seasi.session.start",
-                    "params": {"tenant_id": "pgk", "period_ref": "mal"},
+                    "params": {"tenant_id": "demo", "period_ref": "mal"},
                 }
             ),
             json.dumps(start_req),
@@ -270,7 +270,7 @@ def test_rpc_happy_and_errors(tmp_path: Path) -> None:
     assert responses[2]["error"]["code"] == -32602
     session = responses[3]["result"]
     assert isinstance(session, dict)
-    assert session["client_ref"] == "B82211806"
+    assert session["client_ref"] == "B00000091"
     assert session["state"] == "created"
 
 
@@ -306,16 +306,16 @@ def test_session_service_records_events(tmp_path: Path) -> None:
 
     register("fake-run", lambda: ProcessHarness("fake-run", argv))
     sessions = SessionService(ledger=ledger, root=tmp_path / "ws")
-    session = sessions.start(_tenant(), "B82211806", "2026T3", adapter="fake-run")
+    session = sessions.start(_tenant(), "B00000091", "2026T3", adapter="fake-run")
     events = sessions.run(session, "prompt corto")
     kinds = [e.kind for e in events]
     assert kinds[-1] == HarnessEventKind.COMPLETED
-    types = [r.event_type for r in ledger.tail("pgk", 50)]
+    types = [r.event_type for r in ledger.tail("demo", 50)]
     assert "session.created" in types
     assert "session.state.running" in types
     assert "session.state.completed" in types
     assert "harness.message" in types
-    assert ledger.verify_chain("pgk") is True
+    assert ledger.verify_chain("demo") is True
 
 
 def test_hitl_validation_error_surfaces(tmp_path: Path) -> None:

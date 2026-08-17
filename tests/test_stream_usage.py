@@ -60,7 +60,7 @@ def test_session_run_streams_notifications_before_response(tmp_path: Path) -> No
         "print(json.dumps({'type': 'tool_call', 'tool': 'read'}))\n"
         "print(json.dumps({'type': 'message', 'text': 'dos'}))\n",
     )
-    session = sessions.start(TenantScope(tenant_id="pgk"), "B82211806", "2026T3",
+    session = sessions.start(TenantScope(tenant_id="demo"), "B00000091", "2026T3",
                              adapter="stream-fake")
 
     io = _IO(
@@ -71,7 +71,7 @@ def test_session_run_streams_notifications_before_response(tmp_path: Path) -> No
                     "id": 41,
                     "method": "seasi.session.run",
                     "params": {
-                        "tenant_id": "pgk",
+                        "tenant_id": "demo",
                         "session_id": str(session.session_id),
                         "prompt": "p",
                     },
@@ -117,7 +117,7 @@ def test_usage_summary_aggregates_tokens_and_turns(tmp_path: Path) -> None:
         "print(json.dumps({'type': 'tool_call', 'tool': 'read'}))\n"
         "print(json.dumps({'type': 'usage', 'input_tokens': 30, 'output_tokens': 10}))\n",
     )
-    session = sessions.start(TenantScope(tenant_id="pgk"), "B42970335", "2026T3",
+    session = sessions.start(TenantScope(tenant_id="demo"), "B00000092", "2026T3",
                              adapter="usage-fake", model_ref="groq/llama-3.3-70b-versatile")
     events = sessions.run(session, "p")
     assert events[-1].kind == HarnessEventKind.COMPLETED
@@ -129,7 +129,7 @@ def test_usage_summary_aggregates_tokens_and_turns(tmp_path: Path) -> None:
                     "jsonrpc": "2.0",
                     "id": 7,
                     "method": "seasi.usage.summary",
-                    "params": {"tenant_id": "pgk"},
+                    "params": {"tenant_id": "demo"},
                 }
             )
         ]
@@ -139,7 +139,7 @@ def test_usage_summary_aggregates_tokens_and_turns(tmp_path: Path) -> None:
     assert len(result["sessions"]) == 1
     row = result["sessions"][0]
     assert row["session_id"] == str(session.session_id)
-    assert row["client_ref"] == "B42970335"
+    assert row["client_ref"] == "B00000092"
     assert row["model"] == "groq/llama-3.3-70b-versatile"
     assert row["turns"] == 2          # message + tool_call
     assert row["input_tokens"] == 150  # 120 + 30
@@ -153,13 +153,13 @@ def test_usage_summary_isolated_per_tenant(tmp_path: Path) -> None:
     dispatcher = build_dispatcher(ledger=ledger, sessions=sessions, hitl=hitl)
 
     _adapter(tmp_path, "u2", "print('')\n")
-    a = sessions.start(TenantScope(tenant_id="pgk"), "A", "2026T3", adapter="u2")
+    a = sessions.start(TenantScope(tenant_id="demo"), "A", "2026T3", adapter="u2")
     sessions.start(TenantScope(tenant_id="rival"), "B", "2026T3", adapter="u2")
     sessions.run(a, "p")
 
     io = _IO(
         [json.dumps({"jsonrpc": "2.0", "id": 1, "method": "seasi.usage.summary",
-                     "params": {"tenant_id": "pgk"}})]
+                     "params": {"tenant_id": "demo"}})]
     )
     serve(io, io, dispatcher)
     result = json.loads(io.out[0])["result"]

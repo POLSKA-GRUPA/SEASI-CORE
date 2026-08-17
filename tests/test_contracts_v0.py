@@ -15,7 +15,7 @@ from seasi_core.contracts.tenant import TenantScope
 
 
 def _tenant() -> TenantScope:
-    return TenantScope(tenant_id="pgk")
+    return TenantScope(tenant_id="demo")
 
 
 def _future() -> datetime:
@@ -27,7 +27,7 @@ def _future() -> datetime:
 
 def test_session_happy_path() -> None:
     session = AgentSession(
-        tenant=_tenant(), client_ref="B82211806", period_ref="2026T3", adapter="pi"
+        tenant=_tenant(), client_ref="B00000091", period_ref="2026T3", adapter="pi"
     )
     assert session.state == SessionState.CREATED
     assert session.schema_version == "seasi.session/v1"
@@ -59,7 +59,7 @@ def test_artifact_accepts_relative_path() -> None:
         tenant=_tenant(),
         kind="aeat.model",
         content_hash=_digest(),
-        path="clientes/B82211806/2026T3/modelo303.pdf",
+        path="clientes/B00000091/2026T3/modelo303.pdf",
     )
     assert artifact.kind == "aeat.model"
 

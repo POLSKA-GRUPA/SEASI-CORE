@@ -34,7 +34,7 @@ from seasi_core.rpc.server import serve
 from seasi_core.services.sessions import SessionService
 
 
-def _tenant(name: str = "pgk") -> TenantScope:
+def _tenant(name: str = "demo") -> TenantScope:
     return TenantScope(tenant_id=name)
 
 
@@ -71,7 +71,7 @@ def test_chain_tamper_at_every_position(tmp_path: Path) -> None:
             ledger = _fresh_ledger(db, n)
             with ledger._conn:
                 ledger._conn.execute(mutation, (victim,))
-            assert ledger.verify_chain("pgk") is False, (variant_idx, victim)
+            assert ledger.verify_chain("demo") is False, (variant_idx, victim)
             ledger.close()
 
 
@@ -92,7 +92,7 @@ def test_chain_tail_truncation_needs_backup_anchor(tmp_path: Path) -> None:
     led.close()
 
     reopened = EventLedger(truncated)
-    assert reopened.verify_chain("pgk") is True  # chain is blind to tail loss
+    assert reopened.verify_chain("demo") is True  # chain is blind to tail loss
     reopened.close()
     assert sha256(truncated.read_bytes()).hexdigest() != full_digest  # anchor sees it
 
@@ -101,7 +101,7 @@ def test_chain_survives_100_events_and_reorders_fail(tmp_path: Path) -> None:
     ledger = EventLedger(tmp_path / "led.db")
     for i in range(100):
         ledger.append(build_event("test.tick", _tenant(), {"seq_i": i}))
-    assert ledger.verify_chain("pgk") is True
+    assert ledger.verify_chain("demo") is True
     # swap two payloads keeping hashes: digest check inside _chain_hash material
     with ledger._conn:
         r1 = ledger._conn.execute(
@@ -116,7 +116,7 @@ def test_chain_survives_100_events_and_reorders_fail(tmp_path: Path) -> None:
         ledger._conn.execute(
             "UPDATE ledger_events SET payload_json = ? WHERE seq = 11", (r1,)
         )
-    assert ledger.verify_chain("pgk") is False
+    assert ledger.verify_chain("demo") is False
 
 
 def test_concurrent_appends_keep_chain_valid(tmp_path: Path) -> None:
@@ -131,7 +131,7 @@ def test_concurrent_appends_keep_chain_valid(tmp_path: Path) -> None:
     with ledger._conn:
         count = ledger._conn.execute("SELECT COUNT(*) FROM ledger_events").fetchone()[0]
     assert count == 200
-    assert ledger.verify_chain("pgk") is True
+    assert ledger.verify_chain("demo") is True
 
 
 # ---------------------------------------------------------------- scope hard
@@ -139,12 +139,12 @@ def test_concurrent_appends_keep_chain_valid(tmp_path: Path) -> None:
 
 def test_scope_guard_symlink_escape(tmp_path: Path) -> None:
     """A symlink inside the tenant dir pointing outside must not resolve out."""
-    tenant_dir = tmp_path / "pgk"
+    tenant_dir = tmp_path / "demo"
     tenant_dir.mkdir(parents=True)
     outside = tmp_path / "secrets.txt"
     outside.write_text("fuera", encoding="utf-8")
     (tenant_dir / "link.txt").symlink_to(outside)
-    guard = TenantPathGuard(root=tmp_path, tenant_id="pgk")
+    guard = TenantPathGuard(root=tmp_path, tenant_id="demo")
     # resolve() follows symlinks and must refuse the escaped target itself
     with pytest.raises(ScopeViolation):
         guard.resolve("link.txt")
@@ -178,7 +178,7 @@ ESCAPE_CORPUS = [
 
 @pytest.mark.parametrize("candidate", ESCAPE_CORPUS)
 def test_scope_guard_escape_corpus(tmp_path: Path, candidate: str) -> None:
-    guard = TenantPathGuard(root=tmp_path, tenant_id="pgk")
+    guard = TenantPathGuard(root=tmp_path, tenant_id="demo")
     with pytest.raises((ScopeViolation, ValueError)):
         guard.resolve(candidate)
 
@@ -194,15 +194,15 @@ SAFE_WEIRD_NAMES = [
 
 @pytest.mark.parametrize("candidate", SAFE_WEIRD_NAMES)
 def test_scope_guard_safe_weird_names_stay_inside(tmp_path: Path, candidate: str) -> None:
-    guard = TenantPathGuard(root=tmp_path, tenant_id="pgk")
+    guard = TenantPathGuard(root=tmp_path, tenant_id="demo")
     resolved = guard.resolve(candidate)
-    base = (tmp_path / "pgk").resolve(strict=False)
+    base = (tmp_path / "demo").resolve(strict=False)
     assert base == resolved or base in resolved.parents
 
 
 def test_scope_guard_unicode_ok_inside(tmp_path: Path) -> None:
-    guard = TenantPathGuard(root=tmp_path, tenant_id="pgk")
-    ok = guard.resolve("clientes/B82211806/2026T3/factura-café-ñ.pdf")
+    guard = TenantPathGuard(root=tmp_path, tenant_id="demo")
+    ok = guard.resolve("clientes/B00000091/2026T3/factura-café-ñ.pdf")
     assert "clientes" in str(ok)
 
 
@@ -352,7 +352,7 @@ def test_rpc_unicode_and_string_ids(tmp_path: Path) -> None:
                     "id": "cli-ñ-1",
                     "method": "seasi.session.start",
                     "params": {
-                        "tenant_id": "pgk",
+                        "tenant_id": "demo",
                         "client_ref": "Ñoño-Ünicode-SL",
                         "period_ref": "2026T4",
                     },
@@ -396,7 +396,7 @@ def test_rpc_huge_params_rejected_fast(tmp_path: Path) -> None:
                     "jsonrpc": "2.0",
                     "id": 2,
                     "method": "seasi.session.run",
-                    "params": {"tenant_id": "pgk", "prompt": "A" * 2_000_000},
+                    "params": {"tenant_id": "demo", "prompt": "A" * 2_000_000},
                 }
             )
         ],
@@ -507,8 +507,8 @@ def test_real_stdio_kernel_roundtrip(tmp_path: Path) -> None:
         session = rpc.call(
             "seasi.session.start",
             {
-                "tenant_id": "pgk",
-                "client_ref": "B82211806",
+                "tenant_id": "demo",
+                "client_ref": "B00000091",
                 "period_ref": "2026T3",
             },
         )["result"]
@@ -519,7 +519,7 @@ def test_real_stdio_kernel_roundtrip(tmp_path: Path) -> None:
         pause = rpc.call(
             "seasi.hitl.create",
             {
-                "tenant_id": "pgk",
+                "tenant_id": "demo",
                 "session_id": session_id,
                 "capability_id": "filing.submit",
                 "payload_digest": digest,
@@ -527,7 +527,7 @@ def test_real_stdio_kernel_roundtrip(tmp_path: Path) -> None:
         )["result"]
         assert isinstance(pause, dict) and pause["status"] == "pending"
 
-        listed = rpc.call("seasi.hitl.list", {"tenant_id": "pgk"})["result"]
+        listed = rpc.call("seasi.hitl.list", {"tenant_id": "demo"})["result"]
         assert isinstance(listed, dict)
         assert len(listed["pending"]) == 1
 
@@ -554,10 +554,10 @@ def test_real_stdio_kernel_roundtrip(tmp_path: Path) -> None:
         )
         assert again["error"]["code"] == 100
 
-        empty = rpc.call("seasi.hitl.list", {"tenant_id": "pgk"})["result"]
+        empty = rpc.call("seasi.hitl.list", {"tenant_id": "demo"})["result"]
         assert isinstance(empty, dict) and empty["pending"] == []
 
-        tail = rpc.call("seasi.event.tail", {"tenant_id": "pgk", "limit": 10})["result"]
+        tail = rpc.call("seasi.event.tail", {"tenant_id": "demo", "limit": 10})["result"]
         types = [e["event_type"] for e in tail["events"]]
         assert "session.created" in types
         assert "hitl.pause.created" in types
@@ -600,7 +600,7 @@ def test_hitl_decide_race_second_wins_never(tmp_path: Path) -> None:
         t.join()
     assert results.count("ok") == 1
     assert results.count("fail") == 3
-    assert ledger.verify_chain("pgk") is True
+    assert ledger.verify_chain("demo") is True
 
 
 def test_events_of_type_all_does_not_leak_cross_tenant(tmp_path: Path) -> None:
@@ -610,7 +610,7 @@ def test_events_of_type_all_does_not_leak_cross_tenant(tmp_path: Path) -> None:
     p1 = a.create(
         HitlPause(
             session_id=uuid4(),
-            tenant=_tenant("pgk"),
+            tenant=_tenant("demo"),
             capability_id="x",
             payload_digest="1" * 64,
             expires_at=datetime.now(UTC) + timedelta(minutes=5),
@@ -626,5 +626,5 @@ def test_events_of_type_all_does_not_leak_cross_tenant(tmp_path: Path) -> None:
         )
     )
     intent = a.decide(p1.pause_id, "approved", "pgk-actor")
-    assert intent.tenant.tenant_id == "pgk"
+    assert intent.tenant.tenant_id == "demo"
     time.sleep(0)  # keep import used even if assertions change
