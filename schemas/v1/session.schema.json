@@ -1,0 +1,85 @@
+{
+  "$id": "seasi/session/v1",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "description": "Immutable session record; state transitions are ledger events, not edits.",
+  "properties": {
+    "adapter": {
+      "maxLength": 32,
+      "minLength": 1,
+      "title": "Adapter",
+      "type": "string"
+    },
+    "client_ref": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Client Ref",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "model_ref": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Ref"
+    },
+    "period_ref": {
+      "maxLength": 6,
+      "minLength": 4,
+      "title": "Period Ref",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "seasi.session/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "state": {
+      "default": "created",
+      "description": "Lifecycle states; ``paused_hitl`` means a governed effect awaits approval.",
+      "enum": [
+        "created",
+        "running",
+        "paused_hitl",
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "title": "SessionState",
+      "type": "string"
+    },
+    "tenant": {
+      "$ref": "seasi/tenant-scope/v1"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant",
+    "client_ref",
+    "period_ref",
+    "adapter"
+  ],
+  "title": "AgentSession",
+  "type": "object"
+}

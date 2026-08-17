@@ -1,0 +1,10 @@
+project: seasi-core
+description: >
+  Kernel multi-tenant neutro para workflows agenticos gobernados en servicios
+  profesionales. Los cambios de producto se gestionan con OpenSpec; la verdad
+  de contratos vive en schemas/v1 y src/seasi_core/contracts.
+conventions:
+  spec_language: es
+  requirement_format: "### Requirement: X — #### Scenario: Y (WHEN/THEN)"
+  schema_source_of_truth: schemas/v1
+  phases: interno (cliente cero PGK) -> comercial (multi-inquilino)

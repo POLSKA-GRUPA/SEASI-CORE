@@ -1,0 +1,108 @@
+{
+  "$id": "seasi/hitl-pause/v1",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "description": "A paused effect awaiting human decision; status changes are new events.",
+  "properties": {
+    "artifact_ref": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Artifact Ref"
+    },
+    "capability_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Capability Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "decided_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Decided At"
+    },
+    "decided_by": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Decided By"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "pause_id": {
+      "format": "uuid",
+      "title": "Pause Id",
+      "type": "string"
+    },
+    "payload_digest": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Payload Digest",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "seasi/hitl-pause/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "status": {
+      "default": "pending",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "expired"
+      ],
+      "title": "HitlStatus",
+      "type": "string"
+    },
+    "tenant": {
+      "$ref": "seasi/tenant-scope/v1"
+    }
+  },
+  "required": [
+    "session_id",
+    "tenant",
+    "capability_id",
+    "payload_digest",
+    "expires_at"
+  ],
+  "title": "HitlPause",
+  "type": "object"
+}
