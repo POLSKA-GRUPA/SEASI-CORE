@@ -16,4 +16,4 @@
 
 ## Gate de archivo
 
-El change se archiva cuando: specs ✓, tasks 1-4.3 ✓ (interno desplegado en PGK), paridad ✓, y el bloque 4.4 queda registrado como gate abierto para la fase comercial.
+El change se archiva cuando: specs ✓, tasks 1-4.3 ✓ (interno desplegado en el despacho), paridad ✓, y el bloque 4.4 queda registrado como gate abierto para la fase comercial.

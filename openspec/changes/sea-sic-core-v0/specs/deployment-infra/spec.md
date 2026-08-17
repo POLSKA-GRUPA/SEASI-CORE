@@ -3,10 +3,10 @@
 ## ADDED Requirements
 
 ### Requirement: Fase interna con coste cero
-La v0 se desplegará en PGK (cliente cero) sin coste de infraestructura: DMG con firma ad-hoc + `install.sh` documentado (incluye el paso Gatekeeper explícito), y feed de actualizaciones en GitHub Releases privado.
+La v0 se desplegará en el cliente cero sin coste de infraestructura: DMG con firma ad-hoc + `install.sh` documentado (incluye el paso Gatekeeper explícito), y feed de actualizaciones en GitHub Releases privado.
 
 #### Scenario: instalación interna
-- **WHEN** un equipo de PGK instala la v0 en su Mac
+- **WHEN** un equipo del despacho instala la v0 en su Mac
 - **THEN** el script guía la excepción de Gatekeeper conscientemente y verifica el checksum del DMG
 
 #### Scenario: actualización interna
@@ -35,7 +35,7 @@ El estado (SQLite ledger + brain/ + config de inquilino) se exportará automáti
 - **THEN** la restauración desde el último backup reconstruye ledger y brain íntegros (verificación de hash)
 
 ### Requirement: Gate comercial explícito
-Ningún inquilino externo a PGK se desplegará hasta completar la fase comercial: Apple Developer Program (Developer ID + notarización stapled), firma Windows (Azure Trusted Signing o equivalente), y CI matrix (macOS arm64 + Windows x64) que compile, firme, notarice y publique por canal de inquilino.
+Ningún inquilino externo se desplegará hasta completar la fase comercial: Apple Developer Program (Developer ID + notarización stapled), firma Windows (Azure Trusted Signing o equivalente), y CI matrix (macOS arm64 + Windows x64) que compile, firme, notarice y publique por canal de inquilino.
 
 #### Scenario: primer cliente externo
 - **WHEN** se prepara el despliegue del segundo despacho (pagando)

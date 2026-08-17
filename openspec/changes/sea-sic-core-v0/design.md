@@ -68,10 +68,10 @@ Un inquilino nuevo = una carpeta + una firma. Cero forks del kernel o del shell.
 
 ## 5. Despliegue en dos fases (infraestructura como requisito)
 
-**Fase INTERNA (v0 — PGK, coste ≈ 0 €)**
+**Fase INTERNA (v0 — el despacho, coste ≈ 0 €)**
 - Build DMG con firma ad-hoc + script `install.sh` documentado (ajuste Gatekeeper explícito y consciente).
 - Feed de actualizaciones: GitHub Releases **privado** + manifest firmado (ed25519); clave pública embebida en la app; downgrade y paquetes sin firma = rechazados.
-- Windows: compila en CI pero se distribuye solo a PGK-dev (sin firma; documentado como interno).
+- Windows: compila en CI pero se distribuye solo a el equipo interno (sin firma; documentado como interno).
 - Backups: export local del SQLite + brain/ a la carpeta del despacho.
 
 **Fase COMERCIAL (gate explícito)**
