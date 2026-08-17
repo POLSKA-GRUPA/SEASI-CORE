@@ -31,7 +31,7 @@ from seasi_core.contracts.capabilities import CapabilitySpec, EffectClass
 from seasi_core.contracts.events import EventEnvelope, build_event, utc_now
 from seasi_core.contracts.evidence import ApprovalDecision, ApprovalIntent, default_expiry
 from seasi_core.contracts.tenant import TenantScope
-from seasi_core.contracts.workflows import TransitionSpec, WorkflowDefinition
+from seasi_core.contracts.workflows import ActionCall, TransitionSpec, WorkflowDefinition
 from seasi_core.kernel.effect_policy import EffectPolicy
 from seasi_core.kernel.intent_binding import bind_intent, new_nonce, verify_intent
 from seasi_core.kernel.registry import ActionRegistry
@@ -261,7 +261,8 @@ class NeutralRunner:
                 else None
             )
 
-            result = self._invoke_handler(instance, action.capability_id, action.input)
+            action_input = self._resolved_input(instance, action)
+            result = self._invoke_handler(instance, action.capability_id, action_input)
             if result:
                 instance.data.update(result)
             self._emit(
@@ -274,7 +275,7 @@ class NeutralRunner:
                     "to_state": transition.to_state,
                     "approval_digest": approval_digest,
                     "input_digest": bind_intent(
-                        instance.tenant, action.capability_id, {"input": action.input}
+                        instance.tenant, action.capability_id, {"input": action_input}
                     ),
                 },
             )
@@ -358,8 +359,30 @@ class NeutralRunner:
             "revision": instance.definition.revision,
             "from_state": transition.from_state,
             "to_state": transition.to_state,
-            "input": transition.action.input,
+            "input": self._resolved_input(instance, transition.action),
         }
+
+    def _resolved_input(self, instance: WorkflowInstance, action: ActionCall) -> dict[str, Any]:
+        """Merge static ``input`` with ``input_from`` bindings over workflow data.
+
+        Resolution is fail-closed: a binding path that is not present in the
+        accumulated data raises ``WorkflowError`` instead of dispatching the
+        capability with partial input. Because governed payloads are built
+        from the *resolved* input, the sealed digest covers the real values a
+        human approves — mutating the underlying data after sealing breaks
+        verification exactly like tampering with a static payload.
+        """
+        resolved = dict(action.input)
+        for key, path in action.input_from.items():
+            value: Any = instance.data
+            for part in path.split("."):
+                if not isinstance(value, Mapping) or part not in value:
+                    raise WorkflowError(
+                        f"input_from binding {path!r} for {key!r} not present in workflow data"
+                    )
+                value = value[part]
+            resolved[key] = value
+        return resolved
 
     def _invoke_handler(
         self, instance: WorkflowInstance, capability_id: str, action_input: Mapping[str, Any]

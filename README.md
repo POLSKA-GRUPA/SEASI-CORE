@@ -167,7 +167,7 @@ docs/                # ADRs and architecture decisions
 
 ## Status
 
-`v0.2.2` — kernel contracts, neutral runner with HITL approval authority
+`v0.2.3` — kernel contracts, declarative data binding (`ActionCall.input_from`), neutral runner with HITL approval authority
 (one approval per call, reentrancy guard, explicit intent expiry), and the
 Module SDK (`seasi_core.sdk`) that product modules implement to register
 capabilities and workflows against the kernel.

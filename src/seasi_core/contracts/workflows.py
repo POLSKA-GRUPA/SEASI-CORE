@@ -30,12 +30,21 @@ class StateSpec(BaseModel):
 
 
 class ActionCall(BaseModel):
-    """Declarative invocation of a registered capability."""
+    """Declarative invocation of a registered capability.
+
+    ``input`` carries static values. ``input_from`` maps input keys to
+    dot-paths inside the accumulated workflow data, so a step can consume
+    the output of previous steps declaratively. Bindings are resolved by
+    the runner *before* an ``ApprovalIntent`` is sealed, so a human always
+    approves the real resolved values; a missing path fails the workflow
+    (fail-closed) instead of dispatching with partial input.
+    """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     capability_id: str = Field(min_length=3, max_length=128)
     input: dict[str, Any] = Field(default_factory=dict)
+    input_from: dict[str, str] = Field(default_factory=dict)
 
 
 class TransitionSpec(BaseModel):

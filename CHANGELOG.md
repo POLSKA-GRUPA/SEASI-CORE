@@ -3,6 +3,21 @@
 Todos los cambios notables del kernel se documentan aquí.
 Formato basado en Keep a Changelog; versionado SemVer.
 
+## [0.2.3] — 2026-08-17
+
+### Added
+- **`ActionCall.input_from`**: binding declarativo de datos entre pasos.
+  El runner resuelve rutas con puntos sobre `instance.data` ANTES de
+  sellar el `ApprovalIntent`: el humano aprueba los valores reales.
+  Fail-closed: ruta ausente → workflow FAILED, nunca dispatch parcial.
+  Manipular los datos tras el sellado rompe la verificación (test).
+- Tests de schema twins derivados de `model_json_schema()` + validación
+  de instancias con jsonschema; los twins ya no derivan en silencio.
+
+### Fixed
+- Quickstart del README ejecutable de principio a fin (verificado).
+- Twins corregidos: `required` sin campos con default; opcionales nullable.
+
 ## [0.2.2] — 2026-08-17
 
 ### Fixed
