@@ -10,4 +10,4 @@ The kernel is intentionally small. It owns:
 Domain logic (accounting, fiscal, marketing, ...) NEVER lives here.
 """
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"

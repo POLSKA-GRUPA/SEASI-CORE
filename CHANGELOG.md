@@ -3,6 +3,18 @@
 Todos los cambios notables del kernel se documentan aquí.
 Formato basado en Keep a Changelog; versionado SemVer.
 
+## [0.2.2] — 2026-08-17
+
+### Fixed
+- **Guard de reentrancia**: `run()` sobre una instancia con otra ejecución
+  activa lanza `WorkflowError` (contrato single-thread por instancia).
+- Expiración de intent verificada con evento `approval.invalid` y test
+  de regresión.
+
+### Security
+- Revisión adversarial (clones): sin dobles mutaciones externas por
+  reentrada; cadencia HITL confirmada una-aprobación-por-llamada.
+
 ## [0.2.1] — 2026-08-17
 
 ### Fixed

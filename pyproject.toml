@@ -1,6 +1,6 @@
 [project]
 name = "seasi-core"
-version = "0.2.1"
+version = "0.2.2"
 description = "Neutral multi-tenant kernel for governed agentic workflows: contracts, HITL authority, fail-closed tenancy."
 readme = "README.md"
 requires-python = ">=3.11"

@@ -120,3 +120,49 @@ def test_single_gate_workflow_completes_in_one_approved_call() -> None:
     assert instance.status is WorkflowStatus.PAUSED_APPROVAL
     instance = runner.run(instance, approver=_approve)
     assert instance.status is WorkflowStatus.COMPLETED
+
+
+def test_run_is_not_reentrant(runner: NeutralRunner) -> None:
+    """Dos run() concurrentes sobre la misma instancia: el segundo rechaza."""
+    instance = runner.start(_definition(), TENANT)
+    instance = runner.run(instance)
+    assert instance.status is WorkflowStatus.PAUSED_APPROVAL
+
+    instance._executing = True  # simula un run activo en otro hilo
+    try:
+        from seasi_core.orchestration.runner import WorkflowError
+
+        with pytest.raises(WorkflowError, match="not reentrant"):
+            runner.run(instance, approver=_approve)
+    finally:
+        instance._executing = False
+
+    # tras liberar, funciona normalmente
+    instance = runner.run(instance, approver=_approve)
+    assert instance.status is WorkflowStatus.PAUSED_APPROVAL
+
+
+def test_expired_intent_fails_explicitly(runner: NeutralRunner) -> None:
+    """Un intent expirado se reporta como failure_reason explicito."""
+    from datetime import timedelta
+
+    instance = runner.start(_definition(), TENANT)
+    instance = runner.run(instance)
+    assert instance.status is WorkflowStatus.PAUSED_APPROVAL
+
+    # expirar el intent sellado
+    intent = instance.pending_intent
+    assert intent is not None
+    expired = intent.model_copy(
+        update={
+            "created_at": utc_now() - timedelta(seconds=2000),
+            "expires_at": utc_now() - timedelta(seconds=1000),
+        }
+    )
+    instance.pending_intent = expired
+
+    instance = runner.run(instance, approver=_approve)
+    # fail-closed: queda pausado con approval.invalid (digest y expiracion verificadas)
+    assert instance.status is WorkflowStatus.PAUSED_APPROVAL
+    types = [e.event_type for e in instance.history]
+    assert "approval.invalid" in types

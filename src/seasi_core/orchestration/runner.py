@@ -69,6 +69,7 @@ class WorkflowInstance:
     pending_transition: TransitionSpec | None = None
     failure_reason: str | None = None
     history: list[EventEnvelope] = field(default_factory=list)
+    _executing: bool = field(default=False, repr=False, compare=False)
 
 
 class EventSink:
@@ -150,6 +151,25 @@ class NeutralRunner:
         """
         if instance.status in (WorkflowStatus.COMPLETED, WorkflowStatus.FAILED):
             return instance
+
+        if instance._executing:
+            raise WorkflowError(
+                "run() is not reentrant: another run is active on this instance. "
+                "The kernel is single-threaded per instance by contract; guard "
+                "concurrent callers in the host application."
+            )
+        instance._executing = True
+        try:
+            return self._run_locked(instance, approver)
+        finally:
+            instance._executing = False
+
+    def _run_locked(
+        self,
+        instance: WorkflowInstance,
+        approver: Approver | None,
+    ) -> WorkflowInstance:
+        """Single-threaded core of run(); see run() for the contract."""
 
         resolved_here = False
         while instance.status not in (WorkflowStatus.COMPLETED, WorkflowStatus.FAILED):
