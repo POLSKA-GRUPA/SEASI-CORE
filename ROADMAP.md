@@ -55,6 +55,13 @@
 - Mismo workflow ejecutado desde runner neutral y desde arnés externo:
   paridad de eventos.
 
+## v0.5.5 — Platform assembly ✅ (2026-08-17)
+
+- **SEASI-PLATFORM** (repo privado): los tres módulos sobre un kernel;
+  workflow `platform.client-nuevo` cruzado con 3 gates HITL; demo
+  ejecutable; aislamiento multi-gestoría probado. Cadencia HITL v0.2.1:
+  una aprobación humana por llamada.
+
 ## v0.6 — Tenant packs
 
 - Packs de configuración por gestoría (branding, roles, idiomas, SLA,
