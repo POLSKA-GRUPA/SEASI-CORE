@@ -163,6 +163,7 @@ def test_build_manifest_declares_v0_surface() -> None:
         "seasi.session.start",
         "seasi.session.run",
         "seasi.event.tail",
+        "seasi.usage.summary",
         "seasi.hitl.list",
         "seasi.hitl.create",
         "seasi.hitl.decide",

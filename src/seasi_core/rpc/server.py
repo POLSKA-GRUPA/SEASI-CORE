@@ -22,7 +22,19 @@ from pydantic import BaseModel, ValidationError
 
 from seasi_core.contracts.shell_api import ShellErrorCode, rpc_error_payload
 
-Handler = Callable[[dict[str, Any]], Any]
+Handler = Callable[..., Any]
+Notify = Callable[[str, dict[str, Any]], None]
+
+
+def _accepts_notify(handler: Handler) -> bool:
+    """True si el handler declara parámetro ``notify`` (streaming opcional)."""
+    import inspect
+
+    try:
+        sig = inspect.signature(handler)
+    except (TypeError, ValueError):
+        return False
+    return "notify" in sig.parameters
 
 
 class RpcError(Exception):
@@ -49,7 +61,12 @@ class Dispatcher:
     def methods(self) -> list[str]:
         return sorted(self._handlers)
 
-    def call(self, method: str, params: Any) -> Any:
+    def call(
+        self,
+        method: str,
+        params: Any,
+        notify: Notify | None = None,
+    ) -> Any:
         entry = self._handlers.get(method)
         if entry is None:
             raise RpcError(ShellErrorCode.METHOD_NOT_FOUND, f"unknown method {method!r}")
@@ -59,7 +76,7 @@ class Dispatcher:
                 raise RpcError(
                     ShellErrorCode.INVALID_PARAMS, f"{method} takes no params"
                 )
-            return handler({})
+            return handler({}, notify) if _accepts_notify(handler) else handler({})
         if not isinstance(params, dict):
             raise RpcError(ShellErrorCode.INVALID_PARAMS, "params must be an object")
         try:
@@ -68,7 +85,8 @@ class Dispatcher:
             raise RpcError(
                 ShellErrorCode.INVALID_PARAMS, "invalid params", data=exc.errors(include_url=False)
             ) from exc
-        return handler(validated.model_dump())
+        dumped = validated.model_dump()
+        return handler(dumped, notify) if _accepts_notify(handler) else handler(dumped)
 
 
 def _make_response(request_id: Any, result: Any) -> dict[str, Any]:
@@ -106,12 +124,29 @@ def _validate_request(payload: Any) -> tuple[str, Any, Any]:
 
 
 def serve(reader: IO[str], writer: IO[str], dispatcher: Dispatcher) -> None:
-    """Blocking loop: read one JSON per line, write one response per line."""
+    """Blocking loop: read one JSON per line, write one response per line.
+
+    Handlers MAY stream server notifications (``method``-only lines) while a
+    request is in flight: they are written BEFORE the final response line,
+    preserving strict per-request wire ordering.
+    """
     for raw_line in reader:
         line = raw_line.strip()
         if not line:
             continue
         request_id: Any = None
+
+        def notify(method: str, params: dict[str, Any]) -> None:
+            writer.write(
+                json.dumps(
+                    {"jsonrpc": "2.0", "method": method, "params": params},
+                    ensure_ascii=False,
+                    default=str,
+                )
+                + "\n"
+            )
+            writer.flush()
+
         try:
             try:
                 payload = json.loads(line)
@@ -121,7 +156,7 @@ def serve(reader: IO[str], writer: IO[str], dispatcher: Dispatcher) -> None:
             else:
                 method, params, request_id = _validate_request(payload)
                 try:
-                    result = dispatcher.call(method, params)
+                    result = dispatcher.call(method, params, notify)
                     if request_id is None:
                         continue  # notification: processed, no response
                     response = _make_response(request_id, result)

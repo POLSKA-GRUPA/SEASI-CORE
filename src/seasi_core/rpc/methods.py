@@ -110,7 +110,7 @@ def build_dispatcher(
             ) from exc
         return session.model_dump(mode="json")
 
-    def session_run(params: dict[str, Any]) -> dict[str, Any]:
+    def session_run(params: dict[str, Any], notify: Any = None) -> dict[str, Any]:
         scope = _scope(params["tenant_id"])
         session_id = _uuid(params["session_id"], "session_id")
         session = _load_session(sessions, scope, session_id)
@@ -119,7 +119,14 @@ def build_dispatcher(
             from seasi_core.harness import HarnessBudget
 
             budget = HarnessBudget(max_turns=int(params["budget_turns"]))
-        events = sessions.run(session, params["prompt"], budget)
+
+        def on_event(event: object) -> None:
+            if notify is None:
+                return
+            payload = event.model_dump(mode="json") if hasattr(event, "model_dump") else {}
+            notify("seasi.session.event", {"session_id": str(session_id), "event": payload})
+
+        events = sessions.run(session, params["prompt"], budget, on_event=on_event)
         return {
             "session_id": str(session_id),
             "events": [e.model_dump(mode="json") for e in events],
@@ -141,6 +148,35 @@ def build_dispatcher(
                 for r in records
             ]
         }
+
+    def usage_summary(params: dict[str, Any]) -> dict[str, Any]:
+        scope = _scope(params["tenant_id"])
+        sessions_by_id: dict[str, dict[str, Any]] = {}
+        for rec in ledger.events_of_type(scope.tenant_id, "session.created"):
+            sid = str(rec.payload.get("session_id"))
+            sessions_by_id[sid] = {
+                "session_id": sid,
+                "client_ref": rec.payload.get("client_ref"),
+                "period_ref": rec.payload.get("period_ref"),
+                "model": rec.payload.get("model_ref"),
+                "turns": 0,
+                "input_tokens": 0,
+                "output_tokens": 0,
+            }
+        for rec in ledger.tail(scope.tenant_id, 1_000_000):
+            payload = rec.payload
+            sid = str(payload.get("session_id"))
+            entry = sessions_by_id.get(sid)
+            if entry is None:
+                continue
+            if rec.event_type in ("harness.message", "harness.tool_call"):
+                entry["turns"] = int(entry["turns"]) + 1
+            elif rec.event_type == "harness.usage":
+                data = payload.get("data")
+                if isinstance(data, dict):
+                    entry["input_tokens"] += int(data.get("input_tokens") or 0)
+                    entry["output_tokens"] += int(data.get("output_tokens") or 0)
+        return {"sessions": list(sessions_by_id.values())}
 
     def hitl_create(params: dict[str, Any]) -> dict[str, Any]:
         from datetime import UTC, datetime
@@ -189,6 +225,7 @@ def build_dispatcher(
     dispatcher.register("seasi.session.start", session_start, SessionStartParams)
     dispatcher.register("seasi.session.run", session_run, SessionRunParams)
     dispatcher.register("seasi.event.tail", event_tail, TenantParams)
+    dispatcher.register("seasi.usage.summary", usage_summary, TenantParams)
     dispatcher.register("seasi.hitl.list", hitl_list, TenantParams)
     dispatcher.register("seasi.hitl.create", hitl_create, HitlCreateParams)
     dispatcher.register("seasi.hitl.decide", hitl_decide, HitlDecideParams)

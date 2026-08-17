@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -66,6 +67,7 @@ class SessionService(BaseModel):
         session: AgentSession,
         prompt: str,
         budget: HarnessBudget | None = None,
+        on_event: Callable[[HarnessEvent], None] | None = None,
     ) -> list[HarnessEvent]:
         guard = TenantPathGuard(root=self.root, tenant_id=session.tenant.tenant_id)
         cwd = guard.session_dir(str(session.session_id))
@@ -94,6 +96,8 @@ class SessionService(BaseModel):
                     )
                 )
                 events.append(event)
+                if on_event is not None:
+                    on_event(event)
         except ScopeViolation as exc:
             self._transition(session, SessionState.FAILED)
             msg = f"session {session.session_id} escaped tenant scope"

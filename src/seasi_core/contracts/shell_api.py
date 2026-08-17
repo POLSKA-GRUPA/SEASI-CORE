@@ -91,6 +91,7 @@ def build_manifest() -> ShellApiManifest:
             ),
             RpcMethodSpec(name="seasi.session.run"),
             RpcMethodSpec(name="seasi.event.tail"),
+            RpcMethodSpec(name="seasi.usage.summary"),
             RpcMethodSpec(
                 name="seasi.hitl.list",
                 result_schema_ref="seasi/hitl-pause/v1",
