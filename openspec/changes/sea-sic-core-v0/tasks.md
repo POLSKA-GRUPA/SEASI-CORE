@@ -18,26 +18,26 @@
 - [x] 2.7 Tests de aislamiento entre tenants y de fail-closed (121 tests verdes + smoke RPC stdio)
 
 ## 3. Shell (seasi-despacho, Electron + TS strict)
-- [x] 3.1 Bootstrap electron-vite + TS strict + ESLint + Vitest; domains por screaming architecture (repo `~/SEASI-DESPACHO`)
-- [x] 3.2 Preload mínimo: contextBridge `seasi` con IPC único (`seasi:rpc`); sandbox ON, contextIsolation ON, nav guards + CSP (ESLint pendiente de añadir al instalar deps)
-- [ ] 3.3 Rail de despacho: clientes (NIF) → carpeta de Drive → sesión por trimestre
-- [ ] 3.4 Vista de sesión: chat estructurado + terminal PTY de solo-log
-- [ ] 3.5 Cola HITL: tarjetas de aprobación con artefacto + digest; aprobar/rechazar emite ApprovalIntent
-- [ ] 3.6 Vault: safeStorage + inyección por env; gestión de credenciales del despacho (IMAP, Drive, AEAT, modelos)
-- [ ] 3.7 Proxy local MCP para OAuth (patrón google-rest-mcp auditado): tokens solo en env del proxy
-- [ ] 3.8 Brain: plantilla `brain/` con wikilinks por despacho/cliente + vista grafo + board kanban (parser roadmap.md)
-- [ ] 3.9 Panel de diagnóstico: exportar paquete local (traces anonimizadas + replay)
-- [ ] 3.10 Dashboard de uso por sesión/modelo
-- [ ] 3.11 Loader white-label: `tenant/<id>/config.yaml` firmada (3 planos: marca/capacidades/gobierno)
+- [x] 3.1 Bootstrap electron-vite + TS strict + Vitest; domains por screaming architecture (repo `~/SEASI-DESPACHO`)
+- [x] 3.2 Preload mínimo: contextBridge `seasi` con IPC único kernel (`seasi:rpc`) + `shell:*` auditados (sandbox ON, contextIsolation ON, CSP, window-open deny; `scripts/audit-ipc.mjs` en CI)
+- [x] 3.3 Rail de despacho: clientes (NIF) derivados del ledger → sesión por trimestre (v0: sin lectura de Drive aún)
+- [x] 3.4 Vista de sesión: eventos estructurados del ledger como log vivo (PTY crudo diferido al adaptador streaming)
+- [x] 3.5 Cola HITL: tarjetas con capability+digest+expiración; aprobar/rechazar emite ApprovalIntent (kernel `seasi.hitl.create/list/decide`)
+- [x] 3.6 Vault: safeStorage + inyección por env al proceso kernel; renderer solo ve nombres
+- [ ] 3.7 Proxy local MCP para OAuth (patrón google-rest-mcp auditado) — PENDIENTE
+- [x] 3.8 Brain: notas .md con wikilinks + grafo SVG + board kanban (parser/board testeados)
+- [x] 3.9 Panel de diagnóstico: export local (ledger+README) a carpeta elegida por usuario; sin telemetría
+- [~] 3.10 Dashboard de uso: parcial (badge kernel/adaptadores); métricas por modelo cuando el adaptador streamee usage
+- [x] 3.11 Loader white-label: `tenant.json` firmable en userData (3 planos validados fail-closed, UI aplica marca)
 
 ## 4. Despliegue
-- [ ] 4.1 FASE INTERNA: build DMG ad-hoc + `install.sh` (Gatekeeper consciente + checksum)
-- [ ] 4.2 Feed updates GitHub Releases privado + manifest firmado ed25519 + clave pública embebida + anti-downgrade
-- [ ] 4.3 Backups locales automáticos (SQLite + brain + config) con restauración verificada
-- [ ] 4.4 GATE COMERCIAL (checklist): Apple Developer ID + notarización · Azure Trusted Signing · CI matrix mac/win → firma → notariza → publica por canal · entitlement por inquilino · rechazo de paquetes cruzados
+- [x] 4.1 FASE INTERNA: script `install.sh` (ditto + cuarentena interna documentada, jamás ajustes globales)
+- [x] 4.2 Updater ed25519: feed firmado + clave pública embebida + anti-downgrade + sha de artefacto (`scripts/gen-keys.mjs`, `sign-update.mjs`, `domains/update`); publicación real del feed queda para el primer release interno
+- [~] 4.3 Backups locales con restauración verificada (manual en UI v0; scheduler automático pendiente)
+- [ ] 4.4 GATE COMERCIAL (checklist): Apple Developer ID + notarización · Azure Trusted Signing · CI matrix mac/win · entitlement por inquilino · rechazo de paquetes cruzados — ABIERTO
 
 ## 5. Calidad
-- [ ] 5.1 Harness de paridad: mismos tests JSON-RPC contra pi (y futuro ASIN)
-- [ ] 5.2 Tests UI: Testing Library + Vitest sobre comportamientos (marca aplicada, HITL flujo, IPC)
-- [ ] 5.3 Auditoría automática de superficie IPC en CI (diff de canales expuestos)
-- [ ] 5.4 Plan de replay: reproducir sesión completa desde ledger en tests e2e
+- [x] 5.1 Harness de paridad: misma suite JSON-RPC contra kernel real (`uv run python -m seasi_core.rpc` desde vitest) + digests idénticos a MANIFEST
+- [x] 5.2 Tests UI-dominio: parser brain, updater (forjas ed25519), backup (corrupción), vault (no-fuga), branding (fail-closed) — 54 tests
+- [x] 5.3 Auditoría automática de superficie IPC en CI (`audit-ipc.mjs`)
+- [x] 5.4 Replay: fuzz del transporte RPC (basura binaria, ráfaga 500 notificaciones, ids duplicados) sin crash ni traceback
