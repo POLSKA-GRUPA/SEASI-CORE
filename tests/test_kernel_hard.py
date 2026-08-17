@@ -376,7 +376,7 @@ def test_rpc_bad_tenant_is_domain_error(tmp_path: Path) -> None:
                     "id": 1,
                     "method": "seasi.session.start",
                     "params": {
-                        "tenant_id": "PGK!",
+                        "tenant_id": "DEMO!",
                         "client_ref": "X",
                         "period_ref": "2026T3",
                     },
@@ -625,6 +625,6 @@ def test_events_of_type_all_does_not_leak_cross_tenant(tmp_path: Path) -> None:
             expires_at=datetime.now(UTC) + timedelta(minutes=5),
         )
     )
-    intent = a.decide(p1.pause_id, "approved", "pgk-actor")
+    intent = a.decide(p1.pause_id, "approved", "demo-actor")
     assert intent.tenant.tenant_id == "demo"
     time.sleep(0)  # keep import used even if assertions change
