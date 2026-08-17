@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from seasi_core.contracts.session import AgentSession
 from seasi_core.contracts.shell_api import ShellErrorCode, build_manifest
@@ -42,6 +42,16 @@ class TenantParams(BaseModel):
 
     tenant_id: str = Field(min_length=1, max_length=64)
     limit: int = Field(default=50, ge=1, le=500)
+
+
+class HitlCreateParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    tenant_id: str = Field(min_length=1, max_length=64)
+    session_id: str = Field(min_length=36, max_length=36)
+    capability_id: str = Field(min_length=1, max_length=128)
+    payload_digest: str = Field(min_length=64, max_length=64)
+    ttl_s: float = Field(default=900, gt=0, le=86_400)
 
 
 class HitlDecideParams(BaseModel):
@@ -132,6 +142,30 @@ def build_dispatcher(
             ]
         }
 
+    def hitl_create(params: dict[str, Any]) -> dict[str, Any]:
+        from datetime import UTC, datetime
+
+        from seasi_core.contracts.evidence import default_expiry
+        from seasi_core.contracts.hitl import HitlPause
+
+        scope = _scope(params["tenant_id"])
+        session_id = _uuid(params["session_id"], "session_id")
+        now = datetime.now(UTC)
+        try:
+            pause = HitlPause(
+                session_id=session_id,
+                tenant=scope,
+                capability_id=params["capability_id"],
+                payload_digest=params["payload_digest"],
+                expires_at=default_expiry(now, ttl_s=float(params["ttl_s"])),
+            )
+        except ValidationError as exc:
+            raise RpcError(
+                ShellErrorCode.INVALID_PARAMS, "invalid hitl pause", data=str(exc)
+            ) from exc
+        created = hitl.create(pause)
+        return created.model_dump(mode="json")
+
     def hitl_list(params: dict[str, Any]) -> dict[str, Any]:
         scope = _scope(params["tenant_id"])
         return {
@@ -156,6 +190,7 @@ def build_dispatcher(
     dispatcher.register("seasi.session.run", session_run, SessionRunParams)
     dispatcher.register("seasi.event.tail", event_tail, TenantParams)
     dispatcher.register("seasi.hitl.list", hitl_list, TenantParams)
+    dispatcher.register("seasi.hitl.create", hitl_create, HitlCreateParams)
     dispatcher.register("seasi.hitl.decide", hitl_decide, HitlDecideParams)
     return dispatcher
 

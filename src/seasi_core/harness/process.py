@@ -62,30 +62,37 @@ class ProcessHarness:
             text=True,
             start_new_session=True,
         )
+        # Capture handles before any yield: a cancel() between generator
+        # resumes nulls _proc, but the loop must keep draining captured pipes.
+        proc = self._proc
+        assert proc is not None
+        stdout = proc.stdout
+        assert stdout is not None
         yield self._event(spec, HarnessEventKind.SPAWNED, {"argv": argv})
 
-        assert self._proc is not None
-        assert self._proc.stdout is not None
         turns = 0
         started = time.monotonic()
         try:
-            for line in self._proc.stdout:
-                if self._cancelled:
-                    break
-                event = self._parse_line(spec, line.rstrip("\n"))
-                if event.kind in (HarnessEventKind.MESSAGE, HarnessEventKind.TOOL_CALL):
-                    turns += 1
-                yield event
-                if budget is not None and self._budget_exceeded(budget, turns, started):
-                    self.cancel()
-                    yield self._event(
-                        spec, HarnessEventKind.FAILED, {"reason": "budget_exceeded"}
-                    )
-                    return
+            try:
+                for line in stdout:
+                    if self._cancelled:
+                        break
+                    event = self._parse_line(spec, line.rstrip("\n"))
+                    if event.kind in (HarnessEventKind.MESSAGE, HarnessEventKind.TOOL_CALL):
+                        turns += 1
+                    yield event
+                    if budget is not None and self._budget_exceeded(budget, turns, started):
+                        self.cancel()
+                        yield self._event(
+                            spec, HarnessEventKind.FAILED, {"reason": "budget_exceeded"}
+                        )
+                        return
+            except ValueError:
+                pass  # stdout closed underneath us by cancel()
             if self._cancelled:
                 yield self._event(spec, HarnessEventKind.CANCELLED, {})
                 return
-            returncode = self._proc.wait()
+            returncode = proc.wait()
             kind = HarnessEventKind.COMPLETED if returncode == 0 else HarnessEventKind.FAILED
             yield self._event(
                 spec, kind, {"returncode": returncode}

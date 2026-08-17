@@ -164,6 +164,7 @@ def test_build_manifest_declares_v0_surface() -> None:
         "seasi.session.run",
         "seasi.event.tail",
         "seasi.hitl.list",
+        "seasi.hitl.create",
         "seasi.hitl.decide",
     }
     gated = [m for m in manifest.methods if m.effect_gated]

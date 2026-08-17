@@ -59,48 +59,51 @@ class HitlStore(BaseModel):
         return sorted(pending, key=lambda p: p.created_at)
 
     def decide(self, pause_id: UUID, decision: Decision, actor: str) -> ApprovalIntent:
-        pause = self._load_pause(pause_id)
-        now = _utc_now()
-        if pause.status != HitlStatus.PENDING:
-            msg = f"pause {pause_id} is not pending (status={pause.status})"
-            raise HitlError(msg)
-        if pause.is_expired(now):
-            self.ledger.append(
-                build_event(PAUSE_EXPIRED, pause.tenant, {"pause_id": str(pause_id)})
-            )
-            msg = f"pause {pause_id} expired at {pause.expires_at.isoformat()}"
-            raise HitlError(msg)
+        # Atomic check-then-append: the ledger lock is re-entrant, so two
+        # concurrent decides can never both observe PENDING.
+        with self.ledger.transactional():
+            pause = self._load_pause(pause_id)
+            now = _utc_now()
+            if pause.status != HitlStatus.PENDING:
+                msg = f"pause {pause_id} is not pending (status={pause.status})"
+                raise HitlError(msg)
+            if pause.is_expired(now):
+                self.ledger.append(
+                    build_event(PAUSE_EXPIRED, pause.tenant, {"pause_id": str(pause_id)})
+                )
+                msg = f"pause {pause_id} expired at {pause.expires_at.isoformat()}"
+                raise HitlError(msg)
 
-        intent = ApprovalIntent(
-            tenant=pause.tenant,
-            actor=actor,
-            capability_id=pause.capability_id,
-            payload_digest=pause.payload_digest,
-            created_at=now,
-            expires_at=default_expiry(now),
-            nonce=secrets.token_urlsafe(16),
-        )
-        resolved = pause.model_copy(
-            update={
-                "status": HitlStatus(decision),
-                "decided_at": now,
-                "decided_by": actor,
-            }
-        )
-        self.ledger.append(
-            build_event(
-                PAUSE_DECIDED,
-                pause.tenant,
-                {
-                    "pause_id": str(pause_id),
-                    "decision": decision,
-                    "decided_by": actor,
-                    "intent": intent.model_dump(mode="json"),
-                    "resolved": resolved.model_dump(mode="json"),
-                },
+            intent = ApprovalIntent(
+                tenant=pause.tenant,
+                actor=actor,
+                capability_id=pause.capability_id,
+                payload_digest=pause.payload_digest,
+                created_at=now,
+                expires_at=default_expiry(now),
+                nonce=secrets.token_urlsafe(16),
             )
-        )
-        return intent
+            resolved = pause.model_copy(
+                update={
+                    "status": HitlStatus(decision),
+                    "decided_at": now,
+                    "decided_by": actor,
+                }
+            )
+            self.ledger.append(
+                build_event(
+                    PAUSE_DECIDED,
+                    pause.tenant,
+                    {
+                        "pause_id": str(pause_id),
+                        "decision": decision,
+                        "decided_by": actor,
+                        "intent": intent.model_dump(mode="json"),
+                        "resolved": resolved.model_dump(mode="json"),
+                    },
+                )
+            )
+            return intent
 
     def _load_pause(self, pause_id: UUID) -> HitlPause:
         wanted = str(pause_id)

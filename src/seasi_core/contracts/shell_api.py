@@ -96,6 +96,10 @@ def build_manifest() -> ShellApiManifest:
                 result_schema_ref="seasi/hitl-pause/v1",
             ),
             RpcMethodSpec(
+                name="seasi.hitl.create",
+                params_schema_ref="seasi/hitl-pause/v1",
+            ),
+            RpcMethodSpec(
                 name="seasi.hitl.decide",
                 params_schema_ref="seasi/hitl-pause/v1",
                 effect_gated=True,
