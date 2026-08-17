@@ -21,20 +21,20 @@
 - [x] 3.1 Bootstrap electron-vite + TS strict + Vitest; domains por screaming architecture (repo `~/SEASI-DESPACHO`)
 - [x] 3.2 Preload mínimo: contextBridge `seasi` con IPC único kernel (`seasi:rpc`) + `shell:*` auditados (sandbox ON, contextIsolation ON, CSP, window-open deny; `scripts/audit-ipc.mjs` en CI)
 - [x] 3.3 Rail de despacho: clientes (NIF) derivados del ledger → sesión por trimestre (v0: sin lectura de Drive aún)
-- [x] 3.4 Vista de sesión: eventos estructurados del ledger como log vivo (PTY crudo diferido al adaptador streaming)
+- [x] 3.4 Vista de sesión: eventos estructurados del ledger como log vivo + STREAMING en vivo por notificaciones JSON-RPC (`seasi.session.event`) broadcast a la UI
 - [x] 3.5 Cola HITL: tarjetas con capability+digest+expiración; aprobar/rechazar emite ApprovalIntent (kernel `seasi.hitl.create/list/decide`)
 - [x] 3.6 Vault: safeStorage + inyección por env al proceso kernel; renderer solo ve nombres
-- [ ] 3.7 Proxy local MCP para OAuth (patrón google-rest-mcp auditado) — PENDIENTE
+- [x] 3.7 Proxy local MCP para OAuth: `domains/mcp-proxy` (loopback, refresh con skew 60s, retry-401 único, fail-closed 503, tokens jamás en logs/respuestas) + activación por env/vault + `shell:mcp:status`
 - [x] 3.8 Brain: notas .md con wikilinks + grafo SVG + board kanban (parser/board testeados)
 - [x] 3.9 Panel de diagnóstico: export local (ledger+README) a carpeta elegida por usuario; sin telemetría
-- [~] 3.10 Dashboard de uso: parcial (badge kernel/adaptadores); métricas por modelo cuando el adaptador streamee usage
+- [x] 3.10 Dashboard de uso: pestaña Uso (turnos + tokens in/out por sesión desde `seasi.usage.summary` del ledger) + estado del proxy MCP
 - [x] 3.11 Loader white-label: `tenant.json` firmable en userData (3 planos validados fail-closed, UI aplica marca)
 
 ## 4. Despliegue
 - [x] 4.1 FASE INTERNA: script `install.sh` (ditto + cuarentena interna documentada, jamás ajustes globales)
 - [x] 4.2 Updater ed25519: feed firmado + clave pública embebida + anti-downgrade + sha de artefacto (`scripts/gen-keys.mjs`, `sign-update.mjs`, `domains/update`); publicación real del feed queda para el primer release interno
 - [~] 4.3 Backups locales con restauración verificada (manual en UI v0; scheduler automático pendiente)
-- [ ] 4.4 GATE COMERCIAL (checklist): Apple Developer ID + notarización · Azure Trusted Signing · CI matrix mac/win · entitlement por inquilino · rechazo de paquetes cruzados — ABIERTO
+- [~] 4.4 GATE COMERCIAL scriptable: `scripts/commercial-gate.mjs` (firma Apple, notarización, Azure Trusted Signing, CI matrix, entitlements, IPC audit) + `domains/entitlement` (ed25519, rechazo cross-tenant) + electron-builder.yml + CI mac/win. BLOQUEA con exit≠1 mientras falten credenciales de pago (correcto: fase interna).
 
 ## 5. Calidad
 - [x] 5.1 Harness de paridad: misma suite JSON-RPC contra kernel real (`uv run python -m seasi_core.rpc` desde vitest) + digests idénticos a MANIFEST
