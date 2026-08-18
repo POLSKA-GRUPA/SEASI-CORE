@@ -80,8 +80,8 @@ class HarnessAdapter(Protocol):
 
     name: str
 
-    def start(self, spec: SessionSpec, budget: HarnessBudget | None = None) -> (
-        Iterator[HarnessEvent]
-    ): ...
+    def start(
+        self, spec: SessionSpec, budget: HarnessBudget | None = None
+    ) -> Iterator[HarnessEvent]: ...
 
     def cancel(self) -> None: ...

@@ -36,9 +36,7 @@ def test_session_happy_path() -> None:
 @pytest.mark.parametrize("bad_period", ["2026T5", "26T1", "2026", "2026-Q3", ""])
 def test_session_rejects_bad_period(bad_period: str) -> None:
     with pytest.raises(ValidationError):
-        AgentSession(
-            tenant=_tenant(), client_ref="X", period_ref=bad_period, adapter="pi"
-        )
+        AgentSession(tenant=_tenant(), client_ref="X", period_ref=bad_period, adapter="pi")
 
 
 def test_session_rejects_bad_adapter() -> None:

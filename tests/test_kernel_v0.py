@@ -67,9 +67,7 @@ def test_ledger_detects_tampering(tmp_path: Path) -> None:
     ledger = EventLedger(tmp_path / "led.db")
     ledger.append(build_event("test.tick", _tenant(), {"i": 1}))
     with ledger._conn:  # deliberate tampering: rewrite a payload in place
-        ledger._conn.execute(
-            "UPDATE ledger_events SET payload_json = '{\"i\": 999}' WHERE seq = 1"
-        )
+        ledger._conn.execute("UPDATE ledger_events SET payload_json = '{\"i\": 999}' WHERE seq = 1")
     assert ledger.verify_chain("demo") is False
 
 
@@ -191,9 +189,7 @@ def test_process_harness_budget_enforced(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     spec = SessionSpec(session_id=uuid4(), tenant=_tenant(), prompt="p", cwd=tmp_path)
-    harness = ProcessHarness(
-        "fake", lambda s: [sys.executable, str(script)]
-    )
+    harness = ProcessHarness("fake", lambda s: [sys.executable, str(script)])
     events = list(harness.start(spec, HarnessBudget(deadline_s=0.2)))
     assert events[-1].kind == HarnessEventKind.FAILED
     assert events[-1].data["reason"] == "budget_exceeded"

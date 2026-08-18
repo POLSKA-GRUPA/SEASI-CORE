@@ -57,9 +57,7 @@ class SessionService(BaseModel):
             adapter=harness.name,
             model_ref=model_ref,
         )
-        self.ledger.append(
-            build_event(SESSION_CREATED, tenant, session.model_dump(mode="json"))
-        )
+        self.ledger.append(build_event(SESSION_CREATED, tenant, session.model_dump(mode="json")))
         return session
 
     def run(

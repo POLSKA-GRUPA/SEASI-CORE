@@ -88,8 +88,11 @@ def build_document(model: type[BaseModel]) -> str:
     schema = model.model_json_schema()
     defs = schema.pop("$defs", {})
     schema = _rewrite_refs(schema, defs)
-    schema = {"$schema": "http://json-schema.org/draft-07/schema#",
-              "$id": f"seasi/{slug}/v1", **schema}
+    schema = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": f"seasi/{slug}/v1",
+        **schema,
+    }
     return json.dumps(schema, sort_keys=True, indent=2, ensure_ascii=False) + "\n"
 
 

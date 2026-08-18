@@ -1,35 +1,37 @@
-SEASI-CORE — Source Available License
-Copyright (c) 2026 Kenyi Martín Alcántara. All rights reserved.
+LICENCIA DE SOFTWARE — CÓDIGO PROPIETARIO
 
-1. Grant. The source code in this repository is made publicly available
-   ("source available") for review, evaluation, educational inspection and
-   continuous-integration transparency only.
+Copyright (c) 2025-2026 FUNDADOR SUPREMO, S.L.
+Registro Mercantil de Madrid, hoja M-851326
+C/ de la Mezquita 6, 4.º A, 28054 Madrid (España)
 
-2. Restrictions. Without a separate written license signed by the copyright
-   holder, you may NOT:
-   - use this software or any part of it for commercial purposes;
-   - redistribute it, in source or binary form, verbatim or modified;
-   - remove or alter this notice or the copyright statement.
+1. Titularidad. Todo el código fuente, la documentación, la identidad visual
+   y demás materiales de este repositorio son propiedad exclusiva de
+   FUNDADOR SUPREMO, S.L. (en adelante, «la Titular»). Todos los derechos
+   reservados.
 
-3. Forking on the hosting platform is permitted solely to propose changes
-   back to this repository, and does not grant any right to reuse the code
-   elsewhere.
+2. Acceso restringido. Este repositorio es privado. El mero acceso al mismo
+   no otorga licencia de uso, copia, modificación ni redistribución, salvo
+   lo previsto en el apartado 3.
 
-4. Third-party dependencies keep their own licenses; nothing in this file
-   overrides them.
+3. Uso interno. La Titular autoriza el uso, la copia y la modificación del
+   software únicamente a las personas con acceso concedido, con la única
+   finalidad de colaborar en su desarrollo para la Titular. Queda prohibida
+   toda redistribución, publicación, sublicencia, venta o explotación del
+   software o de partes del mismo sin autorización previa, expresa y por
+   escrito de la Titular.
 
-5. NO WARRANTY. The software is provided "as is", without warranty of any
-   kind, express or implied.
+4. Sin garantías. EL SOFTWARE SE PROPORCIONA «TAL CUAL», SIN GARANTÍAS DE
+   NINGUNA CLASE, EXPRESAS O IMPLÍCITAS, INCLUIDAS ENTRE OTRAS LAS
+   GARANTÍAS DE COMERCIABILIDAD, IDONEIDAD PARA UN PROPÓSITO PARTICULAR E
+   INCUMPLIMIENTO. EN NINGÚN CASO LA TITULAR SERÁ RESPONSABLE DE RECLAMACIÓN,
+   DAÑOS U OTRAS RESPONSABILIDADES, YA SEA EN ACCIÓN CONTRACTUAL, EXTRACONTRACTUAL
+   O CUALQUIER OTRA, DERIVADAS DE O EN CONEXIÓN CON EL SOFTWARE O SU USO.
 
-6. Evaluation. Persons who received access directly from the copyright
-   holder (including prospective investors and their technical advisors
-   conducting due diligence) may additionally compile, run and test the
-   software internally for the sole purpose of evaluation. No production,
-   commercial or redistribution rights are granted; this permission is
-   revocable and expires when the evaluation ends.
+5. Futura apertura. Si el repositorio se hiciera público, la licencia
+   aplicable a las distribuciones realizadas a partir de entonces será la
+   que la Titular publique en su momento; esta licencia propietaria
+   continuará aplicándose a toda copia obtenida durante la vigencia de la
+   presente.
 
-7. Licensing inquiries: contact the copyright holder.
-
-This notice is a summary, not a substitute for a definitive licensing
-agreement. A future release may adopt a standard source-available license
-(e.g. BUSL-1.1) at the copyright holder's discretion.
+6. Contacto. A través del perfil de GitHub de la Titular o de su
+   administrador único.

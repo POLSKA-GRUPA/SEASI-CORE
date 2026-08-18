@@ -41,9 +41,7 @@ class HitlStore(BaseModel):
     ledger: EventLedger
 
     def create(self, pause: HitlPause) -> HitlPause:
-        self.ledger.append(
-            build_event(PAUSE_CREATED, pause.tenant, pause.model_dump(mode="json"))
-        )
+        self.ledger.append(build_event(PAUSE_CREATED, pause.tenant, pause.model_dump(mode="json")))
         return pause
 
     def list_pending(self, tenant: TenantScope) -> list[HitlPause]:

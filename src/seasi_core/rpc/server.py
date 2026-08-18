@@ -73,9 +73,7 @@ class Dispatcher:
         params_model, handler = entry
         if params_model is None:
             if params not in (None, {}):
-                raise RpcError(
-                    ShellErrorCode.INVALID_PARAMS, f"{method} takes no params"
-                )
+                raise RpcError(ShellErrorCode.INVALID_PARAMS, f"{method} takes no params")
             return handler({}, notify) if _accepts_notify(handler) else handler({})
         if not isinstance(params, dict):
             raise RpcError(ShellErrorCode.INVALID_PARAMS, "params must be an object")
@@ -93,9 +91,9 @@ def _make_response(request_id: Any, result: Any) -> dict[str, Any]:
     return {"jsonrpc": "2.0", "id": request_id, "result": result}
 
 
-def _make_error(request_id: Any, code: ShellErrorCode, message: str, data: Any = None) -> (
-    dict[str, Any]
-):
+def _make_error(
+    request_id: Any, code: ShellErrorCode, message: str, data: Any = None
+) -> dict[str, Any]:
     return {
         "jsonrpc": "2.0",
         "id": request_id,
@@ -111,8 +109,10 @@ def _validate_request(payload: Any) -> tuple[str, Any, Any]:
     method = payload.get("method")
     if not isinstance(method, str) or not method:
         raise RpcError(ShellErrorCode.INVALID_REQUEST, "method must be a non-empty string")
-    if "params" in payload and payload["params"] is not None and not isinstance(
-        payload.get("params"), (dict, list)
+    if (
+        "params" in payload
+        and payload["params"] is not None
+        and not isinstance(payload.get("params"), (dict, list))
     ):
         raise RpcError(ShellErrorCode.INVALID_REQUEST, "params must be object or array")
     if isinstance(payload.get("params"), list):
@@ -163,9 +163,7 @@ def serve(reader: IO[str], writer: IO[str], dispatcher: Dispatcher) -> None:
                 except RpcError as rpc_exc:
                     if request_id is None:
                         continue
-                    response = _make_error(
-                        request_id, rpc_exc.code, rpc_exc.message, rpc_exc.data
-                    )
+                    response = _make_error(request_id, rpc_exc.code, rpc_exc.message, rpc_exc.data)
                 except Exception:
                     if request_id is None:
                         continue

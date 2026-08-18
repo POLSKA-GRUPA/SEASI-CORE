@@ -94,9 +94,7 @@ class ProcessHarness:
                 return
             returncode = proc.wait()
             kind = HarnessEventKind.COMPLETED if returncode == 0 else HarnessEventKind.FAILED
-            yield self._event(
-                spec, kind, {"returncode": returncode}
-            )
+            yield self._event(spec, kind, {"returncode": returncode})
         finally:
             self._cleanup()
 

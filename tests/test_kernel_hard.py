@@ -110,12 +110,8 @@ def test_chain_survives_100_events_and_reorders_fail(tmp_path: Path) -> None:
         r2 = ledger._conn.execute(
             "SELECT payload_json FROM ledger_events WHERE seq = 11"
         ).fetchone()[0]
-        ledger._conn.execute(
-            "UPDATE ledger_events SET payload_json = ? WHERE seq = 10", (r2,)
-        )
-        ledger._conn.execute(
-            "UPDATE ledger_events SET payload_json = ? WHERE seq = 11", (r1,)
-        )
+        ledger._conn.execute("UPDATE ledger_events SET payload_json = ? WHERE seq = 10", (r2,))
+        ledger._conn.execute("UPDATE ledger_events SET payload_json = ? WHERE seq = 11", (r1,))
     assert ledger.verify_chain("demo") is False
 
 
@@ -280,9 +276,7 @@ def test_harness_unknown_type_falls_back_to_message(tmp_path: Path) -> None:
 
 def test_harness_cancel_before_first_line(tmp_path: Path) -> None:
     script = tmp_path / "slow.py"
-    script.write_text(
-        "import time\ntime.sleep(30)\n", encoding="utf-8"
-    )
+    script.write_text("import time\ntime.sleep(30)\n", encoding="utf-8")
     harness = ProcessHarness("t", lambda s: [sys.executable, str(script)])
     gen = harness.start(_spec(tmp_path), HarnessBudget(deadline_s=3600))
     first = next(gen)
@@ -474,8 +468,7 @@ class _StdioRpc:
     def call(self, method: str, params: dict[str, object] | None = None) -> dict[str, object]:
         assert self.proc.stdin is not None and self.proc.stdout is not None
         self.proc.stdin.write(
-            json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params or {}})
-            + "\n"
+            json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params or {}}) + "\n"
         )
         self.proc.stdin.flush()
         line = self.proc.stdout.readline()

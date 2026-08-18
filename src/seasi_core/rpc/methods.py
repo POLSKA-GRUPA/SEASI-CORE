@@ -204,15 +204,14 @@ def build_dispatcher(
 
     def hitl_list(params: dict[str, Any]) -> dict[str, Any]:
         scope = _scope(params["tenant_id"])
-        return {
-            "pending": [p.model_dump(mode="json") for p in hitl.list_pending(scope)]
-        }
+        return {"pending": [p.model_dump(mode="json") for p in hitl.list_pending(scope)]}
 
     def hitl_decide(params: dict[str, Any]) -> dict[str, Any]:
         pause_id = _uuid(params["pause_id"], "pause_id")
         try:
             intent = hitl.decide(
-                pause_id, "approved" if params["decision"] == "approved" else "rejected",
+                pause_id,
+                "approved" if params["decision"] == "approved" else "rejected",
                 params["actor"],
             )
         except HitlError as exc:
@@ -232,9 +231,7 @@ def build_dispatcher(
     return dispatcher
 
 
-def _load_session(
-    sessions: SessionService, scope: TenantScope, session_id: UUID
-) -> AgentSession:
+def _load_session(sessions: SessionService, scope: TenantScope, session_id: UUID) -> AgentSession:
     records = sessions.ledger.events_of_type(scope.tenant_id, "session.created")
     wanted = str(session_id)
     for record in reversed(records):

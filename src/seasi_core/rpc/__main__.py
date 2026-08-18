@@ -33,9 +33,7 @@ def main() -> int:
     sessions = SessionService(ledger=ledger, root=root)
     hitl = HitlStore(ledger=ledger)
     dispatcher = build_dispatcher(ledger=ledger, sessions=sessions, hitl=hitl)
-    sys.stderr.write(
-        f"[seasi-rpc] serving on stdio (db={db_path}, root={root})\n"
-    )
+    sys.stderr.write(f"[seasi-rpc] serving on stdio (db={db_path}, root={root})\n")
     sys.stderr.flush()
     serve_stdio(dispatcher)
     return 0

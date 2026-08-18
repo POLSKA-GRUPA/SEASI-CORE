@@ -60,8 +60,9 @@ def test_session_run_streams_notifications_before_response(tmp_path: Path) -> No
         "print(json.dumps({'type': 'tool_call', 'tool': 'read'}))\n"
         "print(json.dumps({'type': 'message', 'text': 'dos'}))\n",
     )
-    session = sessions.start(TenantScope(tenant_id="demo"), "B00000091", "2026T3",
-                             adapter="stream-fake")
+    session = sessions.start(
+        TenantScope(tenant_id="demo"), "B00000091", "2026T3", adapter="stream-fake"
+    )
 
     io = _IO(
         [
@@ -117,8 +118,13 @@ def test_usage_summary_aggregates_tokens_and_turns(tmp_path: Path) -> None:
         "print(json.dumps({'type': 'tool_call', 'tool': 'read'}))\n"
         "print(json.dumps({'type': 'usage', 'input_tokens': 30, 'output_tokens': 10}))\n",
     )
-    session = sessions.start(TenantScope(tenant_id="demo"), "B00000092", "2026T3",
-                             adapter="usage-fake", model_ref="groq/llama-3.3-70b-versatile")
+    session = sessions.start(
+        TenantScope(tenant_id="demo"),
+        "B00000092",
+        "2026T3",
+        adapter="usage-fake",
+        model_ref="groq/llama-3.3-70b-versatile",
+    )
     events = sessions.run(session, "p")
     assert events[-1].kind == HarnessEventKind.COMPLETED
 
@@ -141,7 +147,7 @@ def test_usage_summary_aggregates_tokens_and_turns(tmp_path: Path) -> None:
     assert row["session_id"] == str(session.session_id)
     assert row["client_ref"] == "B00000092"
     assert row["model"] == "groq/llama-3.3-70b-versatile"
-    assert row["turns"] == 2          # message + tool_call
+    assert row["turns"] == 2  # message + tool_call
     assert row["input_tokens"] == 150  # 120 + 30
     assert row["output_tokens"] == 50  # 40 + 10
 
@@ -158,8 +164,16 @@ def test_usage_summary_isolated_per_tenant(tmp_path: Path) -> None:
     sessions.run(a, "p")
 
     io = _IO(
-        [json.dumps({"jsonrpc": "2.0", "id": 1, "method": "seasi.usage.summary",
-                     "params": {"tenant_id": "demo"}})]
+        [
+            json.dumps(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "seasi.usage.summary",
+                    "params": {"tenant_id": "demo"},
+                }
+            )
+        ]
     )
     serve(io, io, dispatcher)
     result = json.loads(io.out[0])["result"]
