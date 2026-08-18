@@ -1,0 +1,9 @@
+{
+  "files": {
+    "artifact.schema.json": "63f0e783e1ad27c9fc8e2189b3832beb2caaa43f5912a3595944e33380acfe2a",
+    "hitl-pause.schema.json": "0198ca84698dc1da6e12b9322ec52ebc491af8e332db368742ebaf2615d08400",
+    "session.schema.json": "0d323fbd100f73555fdda96e65bb9e14276383b4b5c5591813ac830921040ecf",
+    "shell-api.schema.json": "e7a347b0b34cf2987846a7689559147566a99e838604864867c8403da98671e3"
+  },
+  "schema_version": "seasi.schemas/v1"
+}

@@ -147,4 +147,8 @@ class TestShippedSchemas:
             "tenant-scope.schema.json",
             "approval-intent.schema.json",
             "event-envelope.schema.json",
+            "session.schema.json",
+            "artifact.schema.json",
+            "hitl-pause.schema.json",
+            "shell-api.schema.json",
         }

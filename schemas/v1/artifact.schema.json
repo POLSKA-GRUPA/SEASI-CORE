@@ -1,0 +1,58 @@
+{
+  "$id": "seasi/artifact/v1",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "description": "Immutable artifact reference; content lives at ``path`` under the tenant root.",
+  "properties": {
+    "artifact_id": {
+      "format": "uuid",
+      "title": "Artifact Id",
+      "type": "string"
+    },
+    "content_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Content Hash",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "kind": {
+      "maxLength": 64,
+      "minLength": 3,
+      "title": "Kind",
+      "type": "string"
+    },
+    "path": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Path",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "seasi.artifact/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "tenant": {
+      "$ref": "seasi/tenant-scope/v1"
+    }
+  },
+  "required": [
+    "session_id",
+    "tenant",
+    "kind",
+    "content_hash",
+    "path"
+  ],
+  "title": "Artifact",
+  "type": "object"
+}

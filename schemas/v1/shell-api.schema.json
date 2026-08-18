@@ -1,0 +1,74 @@
+{
+  "$id": "seasi/shell-api/v1",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "description": "The complete, versioned surface the shell may call.",
+  "properties": {
+    "methods": {
+      "items": {
+        "additionalProperties": false,
+        "description": "One declared RPC method with optional schema references.",
+        "properties": {
+          "effect_gated": {
+            "default": false,
+            "title": "Effect Gated",
+            "type": "boolean"
+          },
+          "name": {
+            "maxLength": 96,
+            "minLength": 6,
+            "title": "Name",
+            "type": "string"
+          },
+          "params_schema_ref": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 8,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Params Schema Ref"
+          },
+          "result_schema_ref": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 8,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Result Schema Ref"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "RpcMethodSpec",
+        "type": "object"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Methods",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": "seasi/shell-api/v1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "methods"
+  ],
+  "title": "ShellApiManifest",
+  "type": "object"
+}
